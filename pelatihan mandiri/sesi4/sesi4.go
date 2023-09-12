@@ -22,7 +22,7 @@ func (cars Car) Reciver() {
 	fmt.Printf("Car %s telah menempuh %f Mil\n", cars.Type, Mil)
 }
 
-func (siswa []Student) Memamix() {
+func (siswa Student) Memamix() {
 
 
 

@@ -1,1 +1,1 @@
-String, Advance Function, Pointer, Heap & Stack, Struct, Method, Interface, Garbage Collector, Package & Error Handling
+String, Advance Function, Pointer, Heap & Stack, Struct, Method, Interface, Garbage Collector, Package & Error Handling 
