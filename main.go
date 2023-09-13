@@ -1,7 +1,19 @@
 package main
 
-import "fmt"
+import (
+	"project-go/database"
+	"project-go/routes"
+
+	"github.com/gofiber/fiber/v2"
+)
 
 func main() {
-	fmt.Println("Hello World")
+
+	database.Connect()
+	
+	app := fiber.New()
+
+	routes.Setup(app)
+
+	app.Listen(":8000")
 }
