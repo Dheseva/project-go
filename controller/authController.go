@@ -1,9 +1,6 @@
 package controller
 
 import (
-	"crypto/ecdsa"
-	"crypto/elliptic"
-	"crypto/rand"
 	"project-go/database"
 	"project-go/models"
 	"strconv"
@@ -14,8 +11,7 @@ import (
 	"golang.org/x/crypto/bcrypt"
 )
 
-var SecretKey = "secret"
-var SecreteKey *ecdsa.PrivateKey
+ const SecretKey = "rahasia"
 
 func Register(c *fiber.Ctx) error {
 	var data map[string]string
@@ -64,25 +60,21 @@ func Login(c *fiber.Ctx) error {
 		})
 	}
 
-	privateKey, err := ecdsa.GenerateKey(elliptic.P256(), rand.Reader)
+	convKey := []byte(SecretKey)
 
-	if err != nil{
-		c.Status(fiber.StatusInternalServerError)
-		return c.JSON(fiber.Map{
-			"status": false,
-			"error": err.Error(),
-			"message": "could get private key",
-		})
+	costumclaims := &models.MyCustomClaims{
+		int(user.Id),
+		user.Name,
+		jwt.StandardClaims{
+			Issuer: strconv.Itoa(int(user.Id)),
+			ExpiresAt: time.Now().Add(time.Hour * 24).Unix(), // 1day
+		},
 	}
+	claims := jwt.NewWithClaims(jwt.SigningMethodHS256, costumclaims)
 
-	SecreteKey = privateKey
+	
 
-	claims := jwt.NewWithClaims(jwt.SigningMethodES256, jwt.StandardClaims{
-		Issuer: strconv.Itoa(int(user.Id)),
-		ExpiresAt: time.Now().Add(time.Hour * 24).Unix(), // 1day
-	})
-
-	token, err := claims.SignedString(privateKey)
+	token, err := claims.SignedString(convKey)
 
 	if err != nil{
 		c.Status(fiber.StatusInternalServerError)
@@ -113,20 +105,10 @@ func Login(c *fiber.Ctx) error {
 func User (c *fiber.Ctx) error{
 
 	cookie := c.Cookies("jwt")
-
-	privateKey, err := ecdsa.GenerateKey(elliptic.P256(), rand.Reader)
-
-	if err != nil{
-		c.Status(fiber.StatusInternalServerError)
-		return c.JSON(fiber.Map{
-			"status": false,
-			"error": err.Error(),
-			"message": "could get private key",
-		})
-	}
-
-	token, err := jwt.ParseWithClaims(cookie, jwt.StandardClaims{}, func(t *jwt.Token) (interface{}, error) {
-		return privateKey, nil
+ 	standClaims := &models.MyCustomClaims{}
+	convKey := []byte(SecretKey)
+	token, err := jwt.ParseWithClaims(cookie, standClaims, func(t *jwt.Token) (interface{}, error) {
+		return convKey, nil
 	})
 
 	if err != nil {
@@ -138,7 +120,7 @@ func User (c *fiber.Ctx) error{
 		})
 	}
 
-	claims := token.Claims.(*jwt.StandardClaims)
+	claims := token.Claims.(*models.MyCustomClaims)
 
 	var user models.User
 
