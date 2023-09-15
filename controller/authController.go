@@ -20,15 +20,31 @@ func Register(c *fiber.Ctx) error {
 		return err
 	}
 
+	userdata := models.UserData{
+		Fullname: data["name"],
+		Created_at: time.Now().UnixMilli(),
+		Updated_at: time.Now().UnixMilli(),
+	}
+	database.DB.Create(&userdata)
+
 	password, _ := bcrypt.GenerateFromPassword([]byte(data["password"]), 14)
 	user := models.User{
 		Name: data["name"],
 		Password: password,
 		Email: data["email"],
+		UData_id: int(userdata.Id),
+		Created_at: time.Now().UnixMilli(),
+		Updated_at: time.Now().UnixMilli(),
 	}
+	
 
 	database.DB.Create(&user)
-	return c.JSON(user)
+	return c.JSON(fiber.Map{
+		"status": true,
+		"message": "success register data",
+		"data": user,
+		"detail": userdata,
+	})
 }
 
 func Login(c *fiber.Ctx) error {
@@ -60,12 +76,14 @@ func Login(c *fiber.Ctx) error {
 		})
 	}
 
+	var userdata models.UserData
+	database.DB.Where("id = ?", user.UData_id).First(&userdata)
 	convKey := []byte(SecretKey)
 
 	costumclaims := &models.MyCustomClaims{
-		int(user.Id),
-		user.Name,
-		jwt.StandardClaims{
+		IdUser: int(user.Id),
+		Name: user.Name,
+		StandardClaims: jwt.StandardClaims{
 			Issuer: strconv.Itoa(int(user.Id)),
 			ExpiresAt: time.Now().Add(time.Hour * 24).Unix(), // 1day
 		},
@@ -82,7 +100,10 @@ func Login(c *fiber.Ctx) error {
 			"status": false,
 			"error": err.Error(),
 			"message": "could not log in",
-			"data": user,
+			"data": fiber.Map{
+				"user": user,
+				"user_data": userdata,
+			},
 		})
 	}
 
@@ -98,7 +119,10 @@ func Login(c *fiber.Ctx) error {
 	return c.JSON(fiber.Map{
 		"status": true,
 		"message": "success log in",
-		"data": user,
+		"data": fiber.Map{
+			"user": user,
+			"user_data": userdata,
+		},
 	})
 }
 
@@ -123,10 +147,18 @@ func User (c *fiber.Ctx) error{
 	claims := token.Claims.(*models.MyCustomClaims)
 
 	var user models.User
-
 	database.DB.Where("id = ?",claims.Issuer).First(&user)
 
-	return c.JSON(user)
+	var userdata models.UserData
+	database.DB.Where("id = ?", user.UData_id).First(&userdata)
+
+	return c.JSON(fiber.Map{
+		"status": true,
+		"data": fiber.Map{
+			"user": user,
+			"user_data": userdata,
+		},
+	})
 }
 
 func Logout(c *fiber.Ctx) error {
