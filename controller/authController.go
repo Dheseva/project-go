@@ -2,6 +2,7 @@ package controller
 
 import (
 	"project-go/database"
+	"project-go/middleware"
 	"project-go/models"
 	"strconv"
 	"time"
@@ -80,7 +81,7 @@ func Login(c *fiber.Ctx) error {
 	database.DB.Where("id = ?", user.UData_id).First(&userdata)
 	convKey := []byte(SecretKey)
 
-	costumclaims := &models.MyCustomClaims{
+	costumclaims := &middleware.MyCustomClaims{
 		IdUser: int(user.Id),
 		Name: user.Name,
 		StandardClaims: jwt.StandardClaims{
@@ -129,7 +130,7 @@ func Login(c *fiber.Ctx) error {
 func User (c *fiber.Ctx) error{
 
 	cookie := c.Cookies("jwt")
- 	standClaims := &models.MyCustomClaims{}
+ 	standClaims := &middleware.MyCustomClaims{}
 	convKey := []byte(SecretKey)
 	token, err := jwt.ParseWithClaims(cookie, standClaims, func(t *jwt.Token) (interface{}, error) {
 		return convKey, nil
@@ -144,7 +145,7 @@ func User (c *fiber.Ctx) error{
 		})
 	}
 
-	claims := token.Claims.(*models.MyCustomClaims)
+	claims := token.Claims.(*middleware.MyCustomClaims)
 
 	var user models.User
 	database.DB.Where("id = ?",claims.Issuer).First(&user)

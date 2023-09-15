@@ -21,4 +21,7 @@ func Connect() {
 
 	connection.AutoMigrate(&models.User{})
 	connection.AutoMigrate(&models.UserData{})
+	
+	connection.AutoMigrate(&models.Airsoftgun{})
+	connection.AutoMigrate(&models.AirsoftgunData{})
 }

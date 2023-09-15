@@ -1,5 +1,13 @@
 package middleware
 
+import "github.com/dgrijalva/jwt-go"
+
+type MyCustomClaims struct {
+	IdUser int    `json:"iduser"`
+	Name   string `json:"name"`
+	jwt.StandardClaims
+}
+
 // func init() {
 
 // 	privateKey, err := ecdsa.GenerateKey(elliptic.P256(), rand.Reader)
