@@ -43,8 +43,10 @@ func Register(c *fiber.Ctx) error {
 	return c.JSON(fiber.Map{
 		"status": true,
 		"message": "success register data",
-		"data": user,
-		"detail": userdata,
+		"data": fiber.Map{
+			"user": user,
+			"user_data": userdata,
+		},
 	})
 }
 
