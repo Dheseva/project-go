@@ -2,6 +2,7 @@ package main
 
 import (
 	"log"
+	"os"
 	"project-go/database"
 	"project-go/routes"
 
@@ -23,7 +24,15 @@ func main() {
 
 	routes.Setup(app)
 
-	app.Listen(":8000")
+	app.Listen(getPort())
+}
+
+func getPort() string{
+	port := os.Getenv("DB_PORT")
+	if port == ""{
+		return ":8000"
+	}
+	return ":" + port
 }
 
 func loadEnv(){
