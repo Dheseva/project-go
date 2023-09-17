@@ -1,6 +1,8 @@
 package database
 
 import (
+	"fmt"
+	"os"
 	"project-go/models"
 
 	"gorm.io/driver/mysql"
@@ -10,8 +12,13 @@ import (
 var DB *gorm.DB
 
 func Connect() {
-	
-	connection, err := gorm.Open(mysql.Open("root:@/go-receipt"), &gorm.Config{})
+	mysqlDb := fmt.Sprintf("%v:%v@tcp(%v:%v)/%v", 
+			os.Getenv("DB_USER"),
+			os.Getenv("DB_PASSWORD"),
+			os.Getenv("DB_HOST"),
+			os.Getenv("DB_PORT"),
+			os.Getenv("DB_NAME"))
+	connection, err := gorm.Open(mysql.Open(mysqlDb), &gorm.Config{})
 
 	if err != nil {
 		panic("Cannot connect to the database")

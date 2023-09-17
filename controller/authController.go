@@ -1,6 +1,7 @@
 package controller
 
 import (
+	"os"
 	"project-go/database"
 	"project-go/middleware"
 	"project-go/models"
@@ -12,7 +13,7 @@ import (
 	"golang.org/x/crypto/bcrypt"
 )
 
- const SecretKey = "rahasia"
+ var SecretKey = os.Getenv("PRIVATE_KEY_JWT")
 
 func Register(c *fiber.Ctx) error {
 	var data map[string]string
